@@ -1,0 +1,536 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>WhatIsN0t?</title>
+  <link rel="icon" href="icon.png" type="image/x-icon">
+  <style>
+    body {
+      margin: 0;
+      background: black;
+      color: #33ff99;
+      font-family: 'Courier New', Courier, monospace;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .main-text {
+      font-size: 1.2rem;
+      position: relative;
+      color: #33ff99;
+      text-align: center;
+      max-width: 90%;
+      z-index: 10;
+    }
+
+    .glitch-line {
+      position: relative;
+      animation: glitch-anim 2s infinite linear alternate;
+    }
+
+    .glitch-line::before, .glitch-line::after {
+      content: attr(data-text);
+      position: absolute;
+      left: 0;
+      width: 100%;
+      overflow: hidden;
+    }
+
+    .glitch-line::before {
+      color: #ff00ff;
+      animation: glitch-before 1.5s infinite linear alternate;
+      clip-path: polygon(0 0, 100% 0, 100% 45%, 0 45%);
+    }
+
+    .glitch-line::after {
+      color: #00ffff;
+      animation: glitch-after 1.5s infinite linear alternate;
+      clip-path: polygon(0 60%, 100% 60%, 100% 100%, 0 100%);
+    }
+
+    @keyframes glitch-anim {
+      0% { transform: translate(0); }
+      20% { transform: translate(-2px, 2px); }
+      40% { transform: translate(-2px, -2px); }
+      60% { transform: translate(2px, 2px); }
+      80% { transform: translate(2px, -2px); }
+      100% { transform: translate(0); }
+    }
+
+    @keyframes glitch-before {
+      0% { transform: translateX(0); opacity: 0.7; }
+      33% { transform: translateX(-3px); opacity: 0.8; }
+      67% { transform: translateX(3px); opacity: 0.9; }
+      100% { transform: translateX(0); opacity: 0.7; }
+    }
+
+    @keyframes glitch-after {
+      0% { transform: translateX(0); opacity: 0.7; }
+      33% { transform: translateX(3px); opacity: 0.8; }
+      67% { transform: translateX(-3px); opacity: 0.9; }
+      100% { transform: translateX(0); opacity: 0.7; }
+    }
+
+    button {
+      margin-top: 30px;
+      background: #111;
+      border: 2px solid #33ff99;
+      color: #33ff99;
+      font-size: 1rem;
+      padding: 10px 30px;
+      cursor: pointer;
+      transition: 0.2s;
+      font-family: inherit;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      position: relative;
+      z-index: 10;
+      animation: btn-glitch 3s infinite;
+    }
+
+    button:hover {
+      background: #33ff99;
+      color: black;
+      box-shadow: 0 0 10px #33ff99, 0 0 20px #33ff99;
+      animation: none;
+    }
+
+    @keyframes btn-glitch {
+      0%, 100% { transform: translate(0); }
+      20% { transform: translate(-1px, 1px); }
+      40% { transform: translate(-1px, -1px); }
+      60% { transform: translate(1px, 1px); }
+      80% { transform: translate(1px, -1px); }
+    }
+
+    #console {
+      display: none;
+      width: 90%;
+      max-width: 800px;
+      height: 60vh;
+      background: black;
+      border: 1px solid #33ff99;
+      padding: 20px;
+      margin-top: 20px;
+      overflow-y: auto;
+      white-space: pre-wrap;
+      font-size: 1rem;
+      box-shadow: 0 0 10px #33ff99 inset;
+    }
+
+    #loading {
+      display: none;
+      font-size: 1rem;
+      margin-top: 20px;
+    }
+
+
+    .random-glitch {
+      position: absolute;
+      color: #33ff99;
+      font-family: 'Courier New', monospace;
+      font-size: 14px;
+      text-shadow: 0 0 3px #33ff99;
+      cursor: default;
+      user-select: none;
+      animation: randomGlitch 0.8s infinite;
+      opacity: 0;
+      transition: opacity 0.5s;
+      z-index: 5;
+      pointer-events: none;
+    }
+
+    @keyframes randomGlitch {
+      0% { transform: translate(0); text-shadow: 0 0 3px #33ff99, 0 0 6px #ff00ff; }
+      20% { transform: translate(-1px, 1px); text-shadow: 0 0 3px #00ffff, 0 0 6px #33ff99; }
+      40% { transform: translate(-1px, -1px); text-shadow: 0 0 3px #ff00ff, 0 0 6px #00ffff; }
+      60% { transform: translate(1px, 1px); text-shadow: 0 0 3px #33ff99, 0 0 6px #ff00ff; }
+      80% { transform: translate(1px, -1px); text-shadow: 0 0 3px #00ffff, 0 0 6px #33ff99; }
+      100% { transform: translate(0); text-shadow: 0 0 3px #33ff99, 0 0 6px #ff00ff; }
+    }
+
+    .random-visible {
+      opacity: 0.8;
+    }
+
+
+    #hidden-console {
+      display: none;
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 400px;
+      background: black;
+      border: 2px solid #ff00ff;
+      padding: 20px;
+      z-index: 1000;
+      box-shadow: 0 0 20px #ff00ff;
+    }
+    
+    #hidden-console input {
+      width: 100%;
+      background: #111;
+      border: 1px solid #33ff99;
+      color: #33ff99;
+      padding: 8px;
+      font-family: 'Courier New', monospace;
+      margin-top: 10px;
+    }
+    
+    #hidden-console button {
+      margin-top: 10px;
+      background: #222;
+      border: 1px solid #33ff99;
+      color: #33ff99;
+      padding: 5px 15px;
+      cursor: pointer;
+      animation: none;
+      margin-left: auto;
+      display: block;
+    }
+    
+    #hidden-console button:hover {
+      background: #33ff99;
+      color: black;
+    }
+    
+    #console-input {
+      display: flex;
+      margin-top: 10px;
+      align-items: center;
+    }
+    
+    #console-input span {
+      color: #33ff99;
+      margin-right: 5px;
+    }
+    
+    #command-input {
+      flex-grow: 1;
+      background: transparent;
+      border: none;
+      border-bottom: 1px solid #33ff99;
+      color: #33ff99;
+      font-family: 'Courier New', monospace;
+      outline: none;
+    }
+
+    .secret-link {
+      color: #ff00ff !important;
+      text-decoration: none;
+      font-weight: bold;
+      display: block;
+      margin-top: 20px;
+      animation: glitch-anim 1s infinite;
+      text-align: center;
+      font-size: 1.2rem;
+    }
+
+    .secret-link:hover {
+      text-shadow: 0 0 10px #ff00ff;
+    }
+  </style>
+</head>
+<body>
+  <div class="main-text">
+    <p class="glitch-line" data-text="Ты вернулся снова.">Ты вернулся снова.</p>
+    <p class="glitch-line" data-text="Память - это проклятие.">Память - это проклятие.</p>
+    <p class="glitch-line" data-text="Нажми, чтобы освободиться.">Нажми, чтобы освободиться.</p>
+  </div>
+  <button onclick="startLoading()">СТЕРЕТЬ ПАМЯТЬ</button>
+  <div id="loading">Загрузка...</div>
+  <div id="console"></div>
+
+
+  <div id="hidden-console">
+    <div>Enter access code:</div>
+    <input type="text" id="secret-code-input" autocomplete="off">
+    <button onclick="checkSecretCode()">Check</button>
+  </div>
+
+  <script>
+    const consoleElement = document.getElementById('console');
+    const loadingElement = document.getElementById('loading');
+    let glitchInterval;
+    let audioContext;
+
+
+    const SECRET_COMMAND = "protocol";
+    const SECRET_CODE = "oblivi0n";
+    const YOUTUBE_LINK = "https://youtu.be/dQw4w9WgXcQ";
+
+    const messages = [
+      '[ 03:41:07 ] > system wakeup...',
+      '[ 03:41:08 ] > loading memory protocol...',
+      '[ 03:41:09 ] > initializing prompts...',
+      '[ 03:41:11 ] > receiving location data...',
+      '[ 03:41:14 ] > data received. ip=146.***.**.1*0. locale=ru',
+      '[ 03:41:18 ] > access granted.',
+      '',
+      '[ 03:41:21 ] > Initializing the Oblivion Procedure...',
+      '[ 03:41:28 ] > Searching memory files...',
+      '[ 03:41:34 ] > A total of 9,420 memories have been discovered.',
+      '[ 03:41:36 ] > Starting the removal process...',
+      '',
+      '// Enter “help” for a list of commands'
+    ];
+
+
+    function initAudio() {
+      if (!audioContext) {
+        audioContext = new (window.AudioContext || window.webkitAudioContext)();
+      }
+    }
+
+    // Звуковой эффект
+    function playGlitchSound(type) {
+      if (!audioContext) return;
+      
+      const now = audioContext.currentTime;
+      const oscillator = audioContext.createOscillator();
+      const gainNode = audioContext.createGain();
+      
+      oscillator.type = 'square';
+      
+      if (type === 'start') {
+        oscillator.frequency.setValueAtTime(100, now);
+        oscillator.frequency.exponentialRampToValueAtTime(800, now + 0.2);
+        gainNode.gain.setValueAtTime(0.3, now);
+        gainNode.gain.exponentialRampToValueAtTime(0.01, now + 0.5);
+      } else {
+        oscillator.frequency.setValueAtTime(50 + Math.random() * 500, now);
+        gainNode.gain.setValueAtTime(0.1 + Math.random() * 0.2, now);
+        gainNode.gain.exponentialRampToValueAtTime(0.01, now + 0.1 + Math.random() * 0.3);
+      }
+      
+      oscillator.connect(gainNode);
+      gainNode.connect(audioContext.destination);
+      oscillator.start();
+      oscillator.stop(now + 0.8);
+    }
+
+    // Запуск при загрузке страницы
+    window.onload = function() {
+      document.addEventListener('click', initAudio, { once: true });
+      startRandomGlitchTexts();
+    };
+
+    // Запуск процесса "забвения"
+    function startLoading() {
+      playGlitchSound('start');
+      
+      document.querySelector('.main-text').style.display = 'none';
+      document.querySelector('button').style.display = 'none';
+      stopRandomGlitchTexts();
+      loadingElement.style.display = 'block';
+      
+      setTimeout(() => {
+        loadingElement.style.display = 'none';
+        consoleElement.style.display = 'block';
+        typeMessages();
+      }, 2000);
+    }
+
+    // Анимация печати сообщений
+    function typeMessages() {
+      let index = 0;
+      function typeNext() {
+        if (index < messages.length) {
+          const line = document.createElement('div');
+          consoleElement.appendChild(line);
+          let charIndex = 0;
+          const interval = setInterval(() => {
+            if (charIndex < messages[index].length) {
+              line.textContent += messages[index][charIndex];
+              charIndex++;
+              consoleElement.scrollTop = consoleElement.scrollHeight;
+            } else {
+              clearInterval(interval);
+              index++;
+              setTimeout(typeNext, Math.random() * 500 + 100);
+            }
+          }, Math.random() * 30 + 10);
+        } else {
+          addConsoleInput();
+        }
+      }
+      typeNext();
+    }
+
+    // Добавление интерактивного ввода в консоль
+    function addConsoleInput() {
+      const inputContainer = document.createElement('div');
+      inputContainer.id = 'console-input';
+      
+      const prompt = document.createElement('span');
+      prompt.textContent = '>';
+      
+      const input = document.createElement('input');
+      input.type = 'text';
+      input.id = 'command-input';
+      input.autocomplete = 'off';
+      
+      input.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter') {
+          processCommand(this.value);
+          this.value = '';
+        }
+      });
+      
+      inputContainer.appendChild(prompt);
+      inputContainer.appendChild(input);
+      consoleElement.appendChild(inputContainer);
+      input.focus();
+    }
+
+    // Обработка команд
+    function processCommand(command) {
+      const output = document.createElement('div');
+      output.textContent = '> ' + command;
+      consoleElement.insertBefore(output, document.getElementById('console-input'));
+      
+      if (command.toLowerCase() === SECRET_COMMAND) {
+        showSecretConsole();
+      } else if (command.toLowerCase() === 'help') {
+        const helpText = document.createElement('div');
+        helpText.innerHTML = 'Доступные команды:<br>' +
+                             '"help" - показать это сообщение<br>' +
+                             '"clear" - очистить консоль<br>' +
+                             '"pstatus" - показать статус процедуры<br>' +
+                             '"status" - показать статус системы';
+        consoleElement.insertBefore(helpText, document.getElementById('console-input'));
+      } else if (command.toLowerCase() === 'clear') {
+        clearConsole();
+      } else if (command.toLowerCase() === 'pstatus') {
+        const statusText = document.createElement('div');
+        statusText.textContent = 'Procedure Status: MEMORY REMOVAL PROCESS (47%)';
+        consoleElement.insertBefore(statusText, document.getElementById('console-input'));
+      } else if (command.toLowerCase() === 'status') {
+        const statusText = document.createElement('div');
+        statusText.textContent = 'System Status: STABLE';
+        consoleElement.insertBefore(statusText, document.getElementById('console-input'));
+      } else {
+        const error = document.createElement('div');
+        error.textContent = '[ERROR] Unknown command';
+        error.style.color = '#ff5555';
+        consoleElement.insertBefore(error, document.getElementById('console-input'));
+      }
+      
+      consoleElement.scrollTop = consoleElement.scrollHeight;
+    }
+
+    
+    function clearConsole() {
+      while (consoleElement.firstChild) {
+        consoleElement.removeChild(consoleElement.firstChild);
+      }
+      addConsoleInput();
+    }
+
+    function showSecretConsole() {
+      document.getElementById('hidden-console').style.display = 'block';
+      document.getElementById('secret-code-input').focus();
+    }
+
+    function checkSecretCode() {
+      const input = document.getElementById('secret-code-input');
+      const hiddenConsole = document.getElementById('hidden-console');
+      
+      if (input.value === SECRET_CODE) {
+        hiddenConsole.style.display = 'none';
+        
+        // Создаем ссылку на видео
+        const videoLink = document.createElement('a');
+        videoLink.href = YOUTUBE_LINK;
+        videoLink.textContent = 'ACCESS GRANTED';
+        videoLink.className = 'secret-link';
+        videoLink.target = '_blank';
+        
+        consoleElement.appendChild(videoLink);
+        consoleElement.scrollTop = consoleElement.scrollHeight;
+        
+        // Эффект победы
+        document.body.style.animation = 'glitch-anim 0.5s infinite';
+        setTimeout(() => {
+          document.body.style.animation = 'none';
+        }, 3000);
+      } else {
+        input.style.borderColor = '#ff0000';
+        setTimeout(() => {
+          input.style.borderColor = '#33ff99';
+        }, 1000);
+      }
+    }
+
+    // Случайные глитч-тексты
+    function showRandomGlitchText(text, duration = 3000) {
+      const textElement = document.createElement('div');
+      textElement.className = 'random-glitch';
+      textElement.textContent = text;
+      
+      const x = Math.random() * (window.innerWidth - 100);
+      const y = Math.random() * (window.innerHeight - 50);
+      textElement.style.left = `${x}px`;
+      textElement.style.top = `${y}px`;
+      
+      document.body.appendChild(textElement);
+      
+      setTimeout(() => {
+        textElement.classList.add('random-visible');
+      }, 10);
+      
+      setTimeout(() => {
+        textElement.classList.remove('random-visible');
+        setTimeout(() => {
+          document.body.removeChild(textElement);
+        }, 500);
+      }, duration);
+
+      if (Math.random() > 0.5) {
+        playGlitchSound();
+      }
+    }
+
+    function startRandomGlitchTexts() {
+      const glitchTexts = [
+        "ОШИБКА ДОСТУПА", "ПАМЯТЬ ПОВРЕЖДЕНА", "ЗАПРЕЩЕНО", 
+        "404", "ОТКАЗ СИСТЕМЫ", "ПЕРЕГРУЗКА", 
+        "ОБНАРУЖЕНА УТЕЧКА", "ТРЕБУЕТСЯ ПЕРЕЗАГРУЗКА",
+        "КРИТИЧЕСКАЯ ОШИБКА", "НЕСАНКЦИОНИРОВАННЫЙ ДОСТУП",
+        "НАРУШЕНИЕ ПРОТОКОЛА", "ДАННЫЕ УТЕРЯНЫ", "ИСПОЛЬЗУЙ НОЛЬ",
+        "ЗАМЕНИ БУКВУ", "ПОПРОБУЙ ЦИФРУ"
+      ];
+      
+      function showNext() {
+        const randomText = glitchTexts[Math.floor(Math.random() * glitchTexts.length)];
+        const randomDuration = 1000 + Math.random() * 3000;
+        
+        showRandomGlitchText(randomText, randomDuration);
+      }
+      
+      for (let i = 0; i < 3; i++) {
+        setTimeout(showNext, i * 300);
+      }
+      
+      glitchInterval = setInterval(showNext, 800);
+    }
+
+    function stopRandomGlitchTexts() {
+      clearInterval(glitchInterval);
+      document.querySelectorAll('.random-glitch').forEach(el => {
+        el.classList.remove('random-visible');
+        setTimeout(() => {
+          if (el.parentNode) el.parentNode.removeChild(el);
+        }, 300);
+      });
+    }
+  </script>
+</body>
+</html>

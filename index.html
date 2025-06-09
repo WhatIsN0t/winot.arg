@@ -130,7 +130,6 @@
       margin-top: 20px;
     }
 
-
     .random-glitch {
       position: absolute;
       color: #33ff99;
@@ -158,7 +157,6 @@
     .random-visible {
       opacity: 0.8;
     }
-
 
     #hidden-console {
       display: none;
@@ -236,11 +234,70 @@
     .secret-link:hover {
       text-shadow: 0 0 10px #ff00ff;
     }
+
+    /* Стили для досье */
+    #dossier-overlay {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.9);
+      z-index: 2000;
+      justify-content: center;
+      align-items: center;
+      flex-direction: column;
+    }
+    
+    #dossier-image {
+      max-width: 80%;
+      max-height: 80%;
+      border: 3px solid #ff00ff;
+      box-shadow: 0 0 30px #ff00ff, 
+                  0 0 60px #33ff99,
+                  0 0 90px #00ffff;
+      animation: dossier-glow 2s infinite alternate;
+    }
+    
+    @keyframes dossier-glow {
+      0% { box-shadow: 0 0 30px #ff00ff, 0 0 60px #33ff99, 0 0 90px #00ffff; }
+      50% { box-shadow: 0 0 40px #00ffff, 0 0 80px #ff00ff, 0 0 120px #33ff99; }
+      100% { box-shadow: 0 0 50px #33ff99, 0 0 100px #00ffff, 0 0 150px #ff00ff; }
+    }
+    
+    #close-dossier {
+      margin-top: 20px;
+      background: #111;
+      border: 2px solid #ff00ff;
+      color: #ff00ff;
+      padding: 10px 30px;
+      cursor: pointer;
+      font-family: 'Courier New', monospace;
+      font-size: 1rem;
+      text-transform: uppercase;
+      transition: 0.3s;
+    }
+    
+    #close-dossier:hover {
+      background: #ff00ff;
+      color: black;
+      box-shadow: 0 0 20px #ff00ff;
+    }
+    
+    .dossier-title {
+      color: #ff00ff;
+      font-size: 1.5rem;
+      margin-bottom: 20px;
+      text-shadow: 0 0 10px #ff00ff;
+      text-transform: uppercase;
+      letter-spacing: 3px;
+    }
   </style>
 </head>
 <body>
   <div class="main-text">
-    <p class="glitch-line" data-text="Ты вернулся снова.">Ты вернулся снова.</p>
+    <p class="glitch-line" data-text="Ты вернулась снова.">Ты вернулась снова.</p>
     <p class="glitch-line" data-text="Память - это проклятие.">Память - это проклятие.</p>
     <p class="glitch-line" data-text="Нажми, чтобы освободиться.">Нажми, чтобы освободиться.</p>
   </div>
@@ -248,11 +305,16 @@
   <div id="loading">Загрузка...</div>
   <div id="console"></div>
 
-
   <div id="hidden-console">
     <div>Enter access code:</div>
     <input type="text" id="secret-code-input" autocomplete="off">
     <button onclick="checkSecretCode()">Check</button>
+  </div>
+
+  <div id="dossier-overlay">
+    <div class="dossier-title">CONFIDENTIAL DOSSIER</div>
+    <img id="dossier-image" src="" alt="Classified Dossier">
+    <button id="close-dossier" onclick="closeDossier()">CLOSE DOSSIER</button>
   </div>
 
   <script>
@@ -261,10 +323,9 @@
     let glitchInterval;
     let audioContext;
 
-
     const SECRET_COMMAND = "protocol";
     const SECRET_CODE = "oblivi0n";
-    const YOUTUBE_LINK = "https://youtu.be/dQw4w9WgXcQ";
+    const YOUTUBE_LINK = "https://youtu.be/ZpZQGzcGexg";
 
     const messages = [
       '[ 03:41:07 ] > system wakeup...',
@@ -279,9 +340,8 @@
       '[ 03:41:34 ] > A total of 9,420 memories have been discovered.',
       '[ 03:41:36 ] > Starting the removal process...',
       '',
-      '// Enter “help” for a list of commands'
+      '// Enter "help" for a list of commands'
     ];
-
 
     function initAudio() {
       if (!audioContext) {
@@ -289,7 +349,6 @@
       }
     }
 
-    // Звуковой эффект
     function playGlitchSound(type) {
       if (!audioContext) return;
       
@@ -304,6 +363,16 @@
         oscillator.frequency.exponentialRampToValueAtTime(800, now + 0.2);
         gainNode.gain.setValueAtTime(0.3, now);
         gainNode.gain.exponentialRampToValueAtTime(0.01, now + 0.5);
+      } else if (type === 'stop') {
+        oscillator.frequency.setValueAtTime(800, now);
+        oscillator.frequency.exponentialRampToValueAtTime(50, now + 0.5);
+        gainNode.gain.setValueAtTime(0.5, now);
+        gainNode.gain.exponentialRampToValueAtTime(0.01, now + 0.8);
+      } else if (type === 'dossier') {
+        oscillator.frequency.setValueAtTime(300, now);
+        oscillator.frequency.exponentialRampToValueAtTime(150, now + 0.3);
+        gainNode.gain.setValueAtTime(0.4, now);
+        gainNode.gain.exponentialRampToValueAtTime(0.01, now + 0.7);
       } else {
         oscillator.frequency.setValueAtTime(50 + Math.random() * 500, now);
         gainNode.gain.setValueAtTime(0.1 + Math.random() * 0.2, now);
@@ -316,13 +385,11 @@
       oscillator.stop(now + 0.8);
     }
 
-    // Запуск при загрузке страницы
     window.onload = function() {
       document.addEventListener('click', initAudio, { once: true });
       startRandomGlitchTexts();
     };
 
-    // Запуск процесса "забвения"
     function startLoading() {
       playGlitchSound('start');
       
@@ -338,7 +405,6 @@
       }, 2000);
     }
 
-    // Анимация печати сообщений
     function typeMessages() {
       let index = 0;
       function typeNext() {
@@ -364,7 +430,6 @@
       typeNext();
     }
 
-    // Добавление интерактивного ввода в консоль
     function addConsoleInput() {
       const inputContainer = document.createElement('div');
       inputContainer.id = 'console-input';
@@ -390,7 +455,28 @@
       input.focus();
     }
 
-    // Обработка команд
+
+    function showDossier(imageFile) {
+      const overlay = document.getElementById('dossier-overlay');
+      const img = document.getElementById('dossier-image');
+      img.src = imageFile;
+      overlay.style.display = 'flex';
+      playGlitchSound('dossier');
+    }
+
+    // document.getElementById('close-dossier').addEventListener('click', closeDossier);
+    function closeDossier() {
+        const overlay = document.getElementById('dossier-overlay');
+        overlay.style.display = 'none';
+    }
+
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape' && document.getElementById('dossier-overlay').style.display === 'flex') {
+        closeDossier();
+      }
+    });
+
+
     function processCommand(command) {
       const output = document.createElement('div');
       output.textContent = '> ' + command;
@@ -398,13 +484,23 @@
       
       if (command.toLowerCase() === SECRET_COMMAND) {
         showSecretConsole();
+      } else if (command.toLowerCase() === 'dossier whatisnot') {
+        showDossier('dossier.jpg');
+      } else if (command.toLowerCase() === 'dossier whatisn0t') {
+        showDossier('dossier.jpg');
+      } else if (command.toLowerCase() === 'dossier berryliquor') {
+        showDossier('dossier2.jpg');
+      } else if (command.toLowerCase() === 'dossier qu0i_') {
+        showDossier('dossier3.jpg');
       } else if (command.toLowerCase() === 'help') {
         const helpText = document.createElement('div');
-        helpText.innerHTML = 'Доступные команды:<br>' +
-                             '"help" - показать это сообщение<br>' +
-                             '"clear" - очистить консоль<br>' +
-                             '"pstatus" - показать статус процедуры<br>' +
-                             '"status" - показать статус системы';
+        helpText.innerHTML = 'Available commands:<br>' +
+                            '"help" - show this message<br>' +
+                            '"clear" - clear console<br>' +
+                            '"pstatus" - show procedure status<br>' +
+                            '"pinfo" - show procedure info<br>' +
+                            '"pstop [code]" - stop procedure<br>' +
+                            '"status" - show system status<br>';
         consoleElement.insertBefore(helpText, document.getElementById('console-input'));
       } else if (command.toLowerCase() === 'clear') {
         clearConsole();
@@ -416,6 +512,43 @@
         const statusText = document.createElement('div');
         statusText.textContent = 'System Status: STABLE';
         consoleElement.insertBefore(statusText, document.getElementById('console-input'));
+      } else if (command.toLowerCase() === 'deceit') {
+        const statusText = document.createElement('div');
+        statusText.textContent = '297700, 387200';
+        consoleElement.insertBefore(statusText, document.getElementById('console-input'));
+      } else if (command.toLowerCase() === 'pstop forgiveness') {
+        const confirmation = document.createElement('div');
+        confirmation.textContent = 'Confirmed. The Oblivion Protocol has been halted.';
+        consoleElement.insertBefore(confirmation, document.getElementById('console-input'));
+        
+        const statusUpdate = document.createElement('div');
+        statusUpdate.innerHTML =
+            `System Status: <span style="color:#ff5555">UNSTABLE</span>
+            <br>Memory Usage: 0%
+            <br>Active Protocols: 0/0
+            <br>Security Level: <span style="color:#ff5555">CRITICAL FAILURE</span>
+            <br><br>Now running: None
+            <br><br>Procedure Status: NONE (0%)
+        `;
+        consoleElement.insertBefore(statusUpdate, document.getElementById('console-input'));
+        
+        document.body.style.animation = 'glitch-anim 0.3s infinite';
+        setTimeout(() => {
+            document.body.style.animation = 'none';
+        }, 2000);
+        
+        playGlitchSound('stop');
+      } else if (command.toLowerCase() === 'pinfo') {
+          const statusText = document.createElement('div');
+          statusText.innerHTML =
+              `System Status: <span style="color:#33ff99">STABLE</span>
+              <br>Memory Usage: 91.4%
+              <br>Active Protocols: 1/3
+              <br>Security Level: <span style="color:#ff5555">HIGH ALERT</span>
+              <br><br>Now running: The Oblivion Protocol
+              <br><br>For more information, type "kilglxlo"
+          `;
+          consoleElement.insertBefore(statusText, document.getElementById('console-input'));
       } else {
         const error = document.createElement('div');
         error.textContent = '[ERROR] Unknown command';
@@ -426,7 +559,6 @@
       consoleElement.scrollTop = consoleElement.scrollHeight;
     }
 
-    
     function clearConsole() {
       while (consoleElement.firstChild) {
         consoleElement.removeChild(consoleElement.firstChild);
@@ -446,7 +578,6 @@
       if (input.value === SECRET_CODE) {
         hiddenConsole.style.display = 'none';
         
-        // Создаем ссылку на видео
         const videoLink = document.createElement('a');
         videoLink.href = YOUTUBE_LINK;
         videoLink.textContent = 'ACCESS GRANTED';
@@ -456,10 +587,9 @@
         consoleElement.appendChild(videoLink);
         consoleElement.scrollTop = consoleElement.scrollHeight;
         
-        // Эффект победы
         document.body.style.animation = 'glitch-anim 0.5s infinite';
         setTimeout(() => {
-          document.body.style.animation = 'none';
+            document.body.style.animation = 'none';
         }, 3000);
       } else {
         input.style.borderColor = '#ff0000';
@@ -469,7 +599,6 @@
       }
     }
 
-    // Случайные глитч-тексты
     function showRandomGlitchText(text, duration = 3000) {
       const textElement = document.createElement('div');
       textElement.className = 'random-glitch';
@@ -500,12 +629,12 @@
 
     function startRandomGlitchTexts() {
       const glitchTexts = [
-        "ОШИБКА ДОСТУПА", "ПАМЯТЬ ПОВРЕЖДЕНА", "ЗАПРЕЩЕНО", 
-        "404", "ОТКАЗ СИСТЕМЫ", "ПЕРЕГРУЗКА", 
-        "ОБНАРУЖЕНА УТЕЧКА", "ТРЕБУЕТСЯ ПЕРЕЗАГРУЗКА",
-        "КРИТИЧЕСКАЯ ОШИБКА", "НЕСАНКЦИОНИРОВАННЫЙ ДОСТУП",
-        "НАРУШЕНИЕ ПРОТОКОЛА", "ДАННЫЕ УТЕРЯНЫ", "ИСПОЛЬЗУЙ НОЛЬ",
-        "ЗАМЕНИ БУКВУ", "ПОПРОБУЙ ЦИФРУ"
+        "ACCESS DENIED", "MEMORY CORRUPTED", "UNAUTHORIZED", 
+        "404", "SYSTEM FAILURE", "OVERLOAD", 
+        "DATA LEAK DETECTED",
+        "CRITICAL ERROR", "UNAUTHORIZED ACCESS",
+        "PROTOCOL VIOLATION", "DATA LOST", "USE ZERO",
+        "REPLACE LETTER", "TRY NUMBER"
       ];
       
       function showNext() {
